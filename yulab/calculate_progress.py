@@ -45,6 +45,5 @@ if __name__ == "__main__":
                              " be used as the ligand, the second as the"
                              " receptor")
     args = parser.parse_args()
-    run(Path(args.input_dir),
-        Path(args.output_dir),
+    run(Path(args.output_dir),
         Path(args.pdb_pairs))
