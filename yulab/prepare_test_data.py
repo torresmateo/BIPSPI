@@ -47,12 +47,20 @@ def run(indir: Path, outdir: Path, pairs: Path) -> None:
     logger.info("processing pairs file")
     # list of PDB pairs (ligand, receptor)
     pdb_pairs = []
+    uids = set()
+    rep = 0
     with pairs.open() as p:
         for line in p:
             pdb_pairs.append(translate_ids(line.strip()))
+            uid = pdb_pairs[-1][0]
+            if uid in uids:
+                logger.info("repeated")
+                rep += 1
+            uids.add(uid)
+    logger.info(f"repeated {rep=}")
 
     for (uid, ligand, receptor,
-         t_ligand, t_receptor) in track(pairs,
+         t_ligand, t_receptor) in track(pdb_pairs,
                                         description="Renaming files"):
         f_ligand = indir / f"{ligand}.pdb"
         if not f_ligand.exists():
@@ -64,8 +72,8 @@ def run(indir: Path, outdir: Path, pairs: Path) -> None:
             logger.warn(f"{receptor} not found in {indir}"
                         f" ignoring pair: {ligand} {receptor}")
             continue
-        shutil.copy(f_ligand, outdir / f"{uid}_l_u.pdb")
-        shutil.copy(f_receptor, outdir / f"{uid}_r_u.pdb")
+        #shutil.copy(f_ligand, outdir / f"{uid}_l_u.pdb")
+        #shutil.copy(f_receptor, outdir / f"{uid}_r_u.pdb")
 
 
 if __name__ == "__main__":
@@ -73,14 +81,16 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description="Reads Yulab's PDBs and prepares the files for BIPSPI+")
-    parser.add_argument("--input-dir",
+    parser.add_argument("-i", "--input-dir", required=True,
                         help="A directory containing PDF files")
-    parser.add_argument("-o", "--output-dir",
+    parser.add_argument("-o", "--output-dir", required=True,
                         help="A path to write the renamed PDB files")
-    parser.add_argument("-p", "--pdb-pairs",
+    parser.add_argument("-p", "--pdb-pairs", required=True,
                         help="A text file containing a pair of PDB IDs"
                              " per line separated by a + sign, the first will"
                              " be used as the ligand, the second as the"
                              " receptor")
     args = parser.parse_args()
-    run(args.input_dir, args.output_dir, args.pdb_pairs)
+    run(Path(args.input_dir),
+        Path(args.output_dir),
+        Path(args.pdb_pairs))
