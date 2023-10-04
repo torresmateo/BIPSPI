@@ -36,8 +36,22 @@ def run(outdir: Path, pairs: Path) -> None:
         if finished > 1:
             time_diffs.append(times[-1] - times[-2])
 
+    tt_sec = times[-1] - times[0]
+    tt_min = tt_sec/60
+    tt_hou = tt_min/60
+
+    t_mea = np.mean(time_diffs)
+    t_med = np.median(time_diffs)
+    t_min = np.min(time_diffs)
+    t_max = np.max(time_diffs)
+
     logger.info(f"Progress = {finished}/{tot} ({finished/tot*100.0:.2f}%)")
-    logger.info(f"Time diff mean = {np.mean(time_diffs)}")
+    logger.info(f"Time/exp  mean   = {t_mea:.2f} s ({t_mea/60:.2f} m)")
+    logger.info(f"          median = {t_med:.2f} s ({t_med/60:.2f} m)")
+    logger.info(f"          min    = {t_min:.2f} s ({t_min/60:.2f} m)")
+    logger.info(f"          max    = {t_max:.2f} s ({t_max/60:.2f} m)")
+    logger.info(f"          total  = {tt_sec:.2f} s"
+                f" ({tt_min:.2f} m) ({tt_hou:.2f} h)")
 
 
 if __name__ == "__main__":
