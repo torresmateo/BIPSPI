@@ -1,3 +1,4 @@
+import numpy as np
 from pathlib import Path
 import logging
 
@@ -26,10 +27,17 @@ def run(outdir: Path, pairs: Path) -> None:
 
     finished = 0
     predir = outdir / "preds" / "struct"
-    for _ in predir.glob("*.lig.gz"):
+    times = []
+    time_diffs = []
+    for f in sorted(predir.glob("*.lig.gz"),
+                    key=lambda f: f.stat().st_mtime):
         finished += 1
+        times.append(f.stat().st_mtime)
+        if finished > 1:
+            time_diffs.append(times[-1] - times[-2])
 
     logger.info(f"Progress = {finished}/{tot} ({finished/tot*100.0:.2f}%)")
+    logger.info(f"Time diff mean = {np.mean(time_diffs)}")
 
 
 if __name__ == "__main__":
